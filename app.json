@@ -7,9 +7,7 @@
     "icon": "./assets/images/icon.png",
     "scheme": "simbadrivermobile",
     "userInterfaceStyle": "automatic",
-    "newArchEnabled": true,
     "plugins": [
-      "expo-dev-client",
       "expo-router",
       [
         "expo-splash-screen",
@@ -25,7 +23,11 @@
       ]
     ],
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.isdorydennis.SimbaDriverMobile",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
     },
     "android": {
       "adaptiveIcon": {
@@ -39,26 +41,17 @@
     },
     "web": {
       "output": "static",
-      "favicon": "./assets/images/favicon.png"
+      "favicon": "./assets/images/Simba Favicon 2.jpeg"
     },
-    "plugins": [
-      "expo-router",
-      [
-        "expo-splash-screen",
-        {
-          "image": "./assets/images/splash-icon.png",
-          "imageWidth": 200,
-          "resizeMode": "contain",
-          "backgroundColor": "#ffffff",
-          "dark": {
-            "backgroundColor": "#000000"
-          }
-        }
-      ]
-    ],
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "4dc8f537-db74-4d80-b080-8bc70f671c88"
+      }
     }
   }
 }
