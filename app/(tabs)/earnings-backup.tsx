@@ -2,7 +2,6 @@ import { ThemedText } from "@/components/themed-text";
 import { ThemedView } from "@/components/themed-view";
 import { Colors } from "@/constants/theme";
 import { useColorScheme } from "@/hooks/use-color-scheme";
-import { FontAwesome } from "@expo/vector-icons";
 import { useState } from "react";
 import { ScrollView, StyleSheet, TouchableOpacity, View } from "react-native";
 
@@ -30,7 +29,7 @@ export default function EarningsScreen() {
         from: "Karibu na Wilaya ya Temeke",
         to: "Wilaya ya Temeke, Tanzania",
         amount: "TSh 3,000.00",
-        category: "Completed",
+        category: "Imekamilika",
         time: "18 min",
         distance: "12 km",
       },
@@ -40,7 +39,7 @@ export default function EarningsScreen() {
         from: "Karibu na Mbaruku Street",
         to: "Dar es Salaam, Tanzania",
         amount: "TSh 4,500.00",
-        category: "Cancelled",
+        category: "Ulikataa",
         time: "12 min",
         distance: "8 km",
       },
@@ -50,7 +49,7 @@ export default function EarningsScreen() {
         from: "Karibu na Ilala",
         to: "Ilala, Tanzania",
         amount: "TSh 4,500.00",
-        category: "Completed",
+        category: "Imekamilika",
         time: "8 min",
         distance: "5 km",
       },
@@ -60,7 +59,7 @@ export default function EarningsScreen() {
         from: "Karibu na Nakawale",
         to: "Dar es Salaam, Tanzania",
         amount: "TSh 13,000.00",
-        category: "Completed",
+        category: "Imekamilika",
         time: "22 min",
         distance: "15 km",
       },
@@ -93,12 +92,8 @@ export default function EarningsScreen() {
       >
         {/* Header */}
         <View style={styles.header}>
-          <FontAwesome name="dollar" size={32} color={colors.primary} />
           <ThemedText type="title" style={styles.headerTitle}>
-            Earnings
-          </ThemedText>
-          <ThemedText style={styles.headerSubtitle}>
-            Track your income
+            Pata Kipato zaidi
           </ThemedText>
         </View>
 
@@ -123,7 +118,7 @@ export default function EarningsScreen() {
                   styles.periodText,
                   {
                     color:
-                      timePeriod === period ? "#fff" : isDark ? "#fff" : "#666",
+                      timePeriod === period ? "#fff" : isDark ? "#fff" : "#333",
                   },
                 ]}
               >
@@ -133,33 +128,27 @@ export default function EarningsScreen() {
           ))}
         </View>
 
-        {/* Earnings Card - Premium Design */}
+        {/* Earnings Card */}
         <View
-          style={[styles.earningsCard, { backgroundColor: colors.primary }]}
+          style={[
+            styles.earningsCard,
+            { backgroundColor: isDark ? "#1a472a" : colors.primaryLight },
+          ]}
         >
-          <View style={styles.cardHeader}>
-            <FontAwesome name="money" size={24} color="#fff" />
-            <ThemedText style={styles.cardLabel}>
-              {timePeriod} Earnings
-            </ThemedText>
-          </View>
+          <ThemedText style={styles.totalLabel}>
+            Kipato cha {timePeriod}
+          </ThemedText>
           <ThemedText type="title" style={styles.totalAmount}>
             {getPeriodEarnings()}
           </ThemedText>
-          <View style={styles.cardFooter}>
-            <FontAwesome name="check-circle" size={16} color="#4CAF50" />
-            <ThemedText style={styles.subText}>Ready to receive</ThemedText>
-          </View>
+          <ThemedText style={styles.subText}>Kupokea sasa</ThemedText>
         </View>
 
-        {/* Quick Stats - Premium Cards */}
+        {/* Quick Stats */}
         <View style={styles.statsContainer}>
           <View
             style={[styles.statBox, { backgroundColor: colors.cardBackground }]}
           >
-            <View style={styles.statIconBg}>
-              <FontAwesome name="check" size={18} color="#4CAF50" />
-            </View>
             <ThemedText style={styles.statValue}>
               {earningsData.completedRides}
             </ThemedText>
@@ -168,14 +157,6 @@ export default function EarningsScreen() {
           <View
             style={[styles.statBox, { backgroundColor: colors.cardBackground }]}
           >
-            <View
-              style={[
-                styles.statIconBg,
-                { backgroundColor: "rgba(255,107,107,0.2)" },
-              ]}
-            >
-              <FontAwesome name="times" size={18} color="#FF6B6B" />
-            </View>
             <ThemedText style={styles.statValue}>
               {earningsData.cancelledRides}
             </ThemedText>
@@ -184,14 +165,6 @@ export default function EarningsScreen() {
           <View
             style={[styles.statBox, { backgroundColor: colors.cardBackground }]}
           >
-            <View
-              style={[
-                styles.statIconBg,
-                { backgroundColor: "rgba(33,150,243,0.2)" },
-              ]}
-            >
-              <FontAwesome name="tasks" size={18} color="#2196F3" />
-            </View>
             <ThemedText style={styles.statValue}>
               {earningsData.ridesSoFar}
             </ThemedText>
@@ -201,122 +174,67 @@ export default function EarningsScreen() {
 
         {/* Sort Option */}
         <View style={styles.sortContainer}>
-          <View style={styles.sortLeft}>
-            <FontAwesome name="history" size={18} color={colors.primary} />
-            <ThemedText type="subtitle" style={styles.sortLabel}>
-              Ride History
-            </ThemedText>
-          </View>
+          <ThemedText type="subtitle" style={styles.sortLabel}>
+            Historia ya safari
+          </ThemedText>
           <TouchableOpacity
             style={styles.sortButton}
             onPress={() =>
               setSortOrder(sortOrder === "newest" ? "oldest" : "newest")
             }
           >
-            <FontAwesome
-              name={sortOrder === "newest" ? "sort-down" : "sort-up"}
-              size={14}
-              color={colors.primary}
-            />
             <ThemedText style={styles.sortButtonText}>
-              {sortOrder === "newest" ? "Newest" : "Oldest"}
+              {sortOrder === "newest" ? "↓ Newest" : "↑ Oldest"}
             </ThemedText>
           </TouchableOpacity>
         </View>
 
-        {/* Ride History - Premium Cards */}
+        {/* Ride History */}
         <View style={styles.historySection}>
           {sortedRides.map((ride) => (
             <TouchableOpacity
               key={ride.id}
-              style={[
-                styles.rideItem,
-                {
-                  backgroundColor: colors.cardBackground,
-                  borderLeftColor:
-                    ride.category === "Completed" ? "#4CAF50" : "#FF6B6B",
-                },
-              ]}
+              style={[styles.rideItem, { borderBottomColor: colors.divider }]}
               onPress={() =>
                 setExpandedId(expandedId === ride.id ? null : ride.id)
               }
             >
-              <View style={styles.rideMainContent}>
-                <View style={styles.rideIconContainer}>
-                  <FontAwesome
-                    name={
-                      ride.category === "Completed"
-                        ? "check-circle"
-                        : "times-circle"
-                    }
-                    size={18}
-                    color={
-                      ride.category === "Completed" ? "#4CAF50" : "#FF6B6B"
-                    }
-                  />
-                </View>
-                <View style={styles.rideInfo}>
-                  <ThemedText style={styles.rideDate}>{ride.date}</ThemedText>
-                  <ThemedText style={styles.rideRoute} numberOfLines={1}>
-                    {ride.from}
-                  </ThemedText>
-                  <View style={styles.routeArrow}>
-                    <FontAwesome name="arrow-right" size={10} color="#999" />
-                  </View>
-                  <ThemedText style={styles.rideRoute} numberOfLines={1}>
-                    {ride.to}
-                  </ThemedText>
-                  <ThemedText
-                    style={[
-                      styles.rideCategory,
-                      {
-                        color:
-                          ride.category === "Completed" ? "#4CAF50" : "#FF6B6B",
-                      },
-                    ]}
-                  >
-                    {ride.category}
-                  </ThemedText>
-                </View>
+              <View style={styles.rideInfo}>
+                <ThemedText style={styles.rideDate}>{ride.date}</ThemedText>
+                <ThemedText style={styles.rideRoute}>{ride.from}</ThemedText>
+                <ThemedText style={styles.rideRoute}>{ride.to}</ThemedText>
+                <ThemedText
+                  style={[
+                    styles.rideCategory,
+                    {
+                      color:
+                        ride.category === "Imekamilika" ? "#4CAF50" : "#FF6B6B",
+                    },
+                  ]}
+                >
+                  {ride.category}
+                </ThemedText>
               </View>
               <View style={styles.rightSection}>
                 <ThemedText type="subtitle" style={styles.rideAmount}>
                   {ride.amount}
                 </ThemedText>
-                <FontAwesome
-                  name={expandedId === ride.id ? "chevron-up" : "chevron-down"}
-                  size={14}
-                  color={colors.primary}
-                />
+                <ThemedText style={styles.expandIcon}>
+                  {expandedId === ride.id ? "▲" : "▼"}
+                </ThemedText>
               </View>
 
               {/* Expanded Details */}
               {expandedId === ride.id && (
                 <View style={styles.expandedDetails}>
                   <View style={styles.detailRow}>
-                    <View style={styles.detailIcon}>
-                      <FontAwesome
-                        name="road"
-                        size={12}
-                        color={colors.primary}
-                      />
-                    </View>
-                    <ThemedText style={styles.detailLabel}>
-                      Distance:
-                    </ThemedText>
+                    <ThemedText style={styles.detailLabel}>Umbali:</ThemedText>
                     <ThemedText style={styles.detailValue}>
                       {ride.distance}
                     </ThemedText>
                   </View>
                   <View style={styles.detailRow}>
-                    <View style={styles.detailIcon}>
-                      <FontAwesome
-                        name="clock-o"
-                        size={12}
-                        color={colors.primary}
-                      />
-                    </View>
-                    <ThemedText style={styles.detailLabel}>Time:</ThemedText>
+                    <ThemedText style={styles.detailLabel}>Muda:</ThemedText>
                     <ThemedText style={styles.detailValue}>
                       {ride.time}
                     </ThemedText>
@@ -340,79 +258,45 @@ const styles = StyleSheet.create({
     padding: 16,
   },
   header: {
-    marginBottom: 24,
-    alignItems: "center",
-    paddingVertical: 12,
+    marginBottom: 16,
   },
   headerTitle: {
-    marginTop: 8,
-  },
-  headerSubtitle: {
-    fontSize: 13,
-    opacity: 0.6,
-    marginTop: 4,
+    marginBottom: 8,
   },
   periodSelector: {
     flexDirection: "row",
     gap: 10,
-    marginBottom: 20,
+    marginBottom: 16,
   },
   periodButton: {
     paddingHorizontal: 14,
-    paddingVertical: 10,
-    borderRadius: 10,
+    paddingVertical: 8,
+    borderRadius: 20,
     flex: 1,
     alignItems: "center",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.08,
-    shadowRadius: 2,
-    elevation: 1,
   },
   periodText: {
     fontSize: 12,
-    fontWeight: "700",
-    letterSpacing: 0.2,
-  },
-  earningsCard: {
-    borderRadius: 16,
-    padding: 20,
-    marginBottom: 20,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.15,
-    shadowRadius: 8,
-    elevation: 5,
-  },
-  cardHeader: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginBottom: 12,
-  },
-  cardLabel: {
-    fontSize: 14,
-    color: "#fff",
-    marginLeft: 10,
-    opacity: 0.9,
     fontWeight: "600",
   },
-  totalAmount: {
-    fontSize: 32,
-    fontWeight: "800",
-    color: "#fff",
-    marginBottom: 12,
-    letterSpacing: -0.5,
+  earningsCard: {
+    borderRadius: 12,
+    padding: 20,
+    marginBottom: 20,
   },
-  cardFooter: {
-    flexDirection: "row",
-    alignItems: "center",
+  totalLabel: {
+    fontSize: 14,
+    opacity: 0.7,
+    marginBottom: 8,
+  },
+  totalAmount: {
+    fontSize: 28,
+    fontWeight: "700",
+    marginBottom: 4,
   },
   subText: {
     fontSize: 12,
-    color: "#fff",
-    opacity: 0.8,
-    marginLeft: 8,
-    fontWeight: "500",
+    opacity: 0.6,
   },
   statsContainer: {
     flexDirection: "row",
@@ -422,147 +306,97 @@ const styles = StyleSheet.create({
   },
   statBox: {
     flex: 1,
-    borderRadius: 14,
-    padding: 14,
+    borderRadius: 12,
+    padding: 16,
     alignItems: "center",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.06,
-    shadowRadius: 3,
-    elevation: 1,
-  },
-  statIconBg: {
-    width: 40,
-    height: 40,
-    borderRadius: 10,
-    backgroundColor: "rgba(76, 175, 80, 0.2)",
-    justifyContent: "center",
-    alignItems: "center",
-    marginBottom: 8,
   },
   statValue: {
-    fontSize: 20,
-    fontWeight: "800",
+    fontSize: 24,
+    fontWeight: "700",
     marginBottom: 4,
   },
   statLabel: {
-    fontSize: 11,
+    fontSize: 12,
     opacity: 0.6,
-    fontWeight: "600",
-    letterSpacing: 0.1,
   },
   sortContainer: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
     marginBottom: 16,
-    paddingVertical: 8,
-  },
-  sortLeft: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 10,
   },
   sortLabel: {
     fontSize: 14,
-    fontWeight: "700",
   },
   sortButton: {
-    flexDirection: "row",
     paddingHorizontal: 12,
-    paddingVertical: 8,
-    borderRadius: 10,
+    paddingVertical: 6,
+    borderRadius: 8,
     backgroundColor: "rgba(76, 175, 80, 0.1)",
-    alignItems: "center",
-    gap: 6,
   },
   sortButtonText: {
     fontSize: 12,
-    fontWeight: "700",
     color: "#4CAF50",
-    letterSpacing: 0.2,
+    fontWeight: "600",
   },
   historySection: {
     marginBottom: 30,
-    gap: 12,
   },
   rideItem: {
-    paddingVertical: 14,
-    paddingHorizontal: 14,
-    borderLeftWidth: 5,
-    borderRadius: 12,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.06,
-    shadowRadius: 3,
-    elevation: 1,
-  },
-  rideMainContent: {
-    flexDirection: "row",
-    alignItems: "flex-start",
-    marginBottom: 12,
-  },
-  rideIconContainer: {
-    marginRight: 12,
-    marginTop: 2,
+    paddingVertical: 12,
+    borderBottomWidth: 1,
   },
   rideInfo: {
     flex: 1,
-  },
-  rideDate: {
-    fontSize: 11,
-    opacity: 0.6,
-    marginBottom: 4,
-    fontWeight: "500",
-  },
-  rideRoute: {
-    fontSize: 12,
-    marginBottom: 2,
-    fontWeight: "500",
-  },
-  routeArrow: {
-    marginVertical: 3,
-    marginLeft: 2,
-  },
-  rideCategory: {
-    fontSize: 11,
-    marginTop: 4,
-    fontWeight: "700",
-    letterSpacing: 0.2,
+    marginRight: 12,
+    marginBottom: 8,
   },
   rightSection: {
-    alignItems: "flex-end",
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 8,
+  },
+  rideDate: {
+    fontSize: 12,
+    opacity: 0.6,
+    marginBottom: 4,
+  },
+  rideRoute: {
+    fontSize: 13,
+    marginBottom: 2,
+  },
+  rideCategory: {
+    fontSize: 12,
+    marginTop: 4,
+    fontWeight: "600",
   },
   rideAmount: {
-    fontSize: 13,
-    fontWeight: "800",
-    color: "#4CAF50",
-    marginBottom: 4,
+    fontSize: 14,
+    fontWeight: "600",
+  },
+  expandIcon: {
+    fontSize: 10,
+    marginLeft: 8,
   },
   expandedDetails: {
     marginTop: 12,
     paddingTop: 12,
     borderTopWidth: 1,
-    borderTopColor: "rgba(0,0,0,0.1)",
+    borderTopColor: "#ddd",
+    opacity: 0.7,
   },
   detailRow: {
     flexDirection: "row",
-    alignItems: "center",
+    justifyContent: "space-between",
     marginBottom: 8,
   },
-  detailIcon: {
-    marginRight: 10,
-    width: 18,
-    alignItems: "center",
-  },
   detailLabel: {
-    fontSize: 11,
-    opacity: 0.6,
-    fontWeight: "600",
-    width: 60,
+    fontSize: 12,
+    opacity: 0.7,
   },
   detailValue: {
     fontSize: 12,
-    fontWeight: "700",
+    fontWeight: "600",
   },
 });
