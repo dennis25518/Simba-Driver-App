@@ -2,8 +2,10 @@ import { ThemedText } from "@/components/themed-text";
 import { ThemedView } from "@/components/themed-view";
 import { Colors } from "@/constants/theme";
 import { useAuth } from "@/context/auth";
+import { useOrders } from "@/context/orders";
 import { useColorScheme } from "@/hooks/use-color-scheme";
 import { supabase } from "@/lib/supabase";
+import { FontAwesome } from "@expo/vector-icons";
 import { Link } from "expo-router";
 import { useRef, useState } from "react";
 import {
@@ -26,6 +28,7 @@ export default function HomeScreen() {
   const colors = Colors[colorScheme ?? "light"];
   const insets = useSafeAreaInsets();
   const { user, signOut } = useAuth();
+  const { pendingOrders, acceptOrder } = useOrders();
   const [isOnline, setIsOnline] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [mapExpanded, setMapExpanded] = useState(false);
@@ -67,6 +70,10 @@ export default function HomeScreen() {
     if (!user) return;
 
     try {
+      // Accept order in context
+      acceptOrder(gigData);
+
+      // Save to database
       await supabase.from("gigs").insert([
         {
           driver_id: user.id,
@@ -131,35 +138,15 @@ export default function HomeScreen() {
     ]).start();
   };
 
-  const gigs = [
-    {
-      id: 1,
-      from: "Ardhi University",
-      to: "Moroco Square",
-      distance: "12 km",
-      eta: "18 min",
-      amount: "TSh 15,000",
-      passenger: "John Doe",
-    },
-    {
-      id: 2,
-      from: "Chuo Cha Maji",
-      to: "Tabata Segerea",
-      distance: "8 km",
-      eta: "12 min",
-      amount: "TSh 10,000",
-      passenger: "Jane Smith",
-    },
-    {
-      id: 3,
-      from: "Posta Station",
-      to: "Mbagala",
-      distance: "5 km",
-      eta: "8 min",
-      amount: "TSh 7,500",
-      passenger: "Ahmed Hassan",
-    },
-  ];
+  const gigs = pendingOrders.map((order) => ({
+    id: order.id,
+    from: order.from,
+    to: order.to,
+    distance: order.distance,
+    eta: order.eta,
+    amount: order.amount,
+    passenger: order.customer,
+  }));
 
   return (
     <ThemedView style={styles.container}>
@@ -187,14 +174,25 @@ export default function HomeScreen() {
       >
         <View style={styles.sidebarContent}>
           <TouchableOpacity style={styles.closeButton} onPress={toggleSidebar}>
-            <ThemedText style={styles.closeIcon}>✕</ThemedText>
+            <FontAwesome
+              name="times"
+              size={24}
+              color={isDark ? "#fff" : "#333"}
+            />
           </TouchableOpacity>
 
           <View style={styles.sidebarHeader}>
-            <ThemedText style={styles.sidebarAvatar}>👤</ThemedText>
+            <View style={styles.avatarCircle}>
+              <FontAwesome name="user" size={32} color="#fff" />
+            </View>
             <View style={styles.sidebarUserInfo}>
-              <ThemedText type="subtitle">France Masama</ThemedText>
-              <ThemedText style={styles.userStatus}>⭐ 4.8</ThemedText>
+              <ThemedText type="subtitle" style={{ fontWeight: "700" }}>
+                France Masama
+              </ThemedText>
+              <View style={styles.ratingBadge}>
+                <FontAwesome name="star" size={12} color="#FFB800" />
+                <ThemedText style={styles.ratingText}> 4.8</ThemedText>
+              </View>
             </View>
           </View>
 
@@ -205,7 +203,11 @@ export default function HomeScreen() {
               style={styles.sidebarItem}
               onPress={toggleSidebar}
             >
-              <ThemedText style={styles.sidebarIcon}>👤</ThemedText>
+              <FontAwesome
+                name="user-circle"
+                size={18}
+                color={colors.primary}
+              />
               <ThemedText style={styles.sidebarLabel}>Profili yangu</ThemedText>
             </TouchableOpacity>
           </Link>
@@ -215,7 +217,7 @@ export default function HomeScreen() {
               style={styles.sidebarItem}
               onPress={toggleSidebar}
             >
-              <ThemedText style={styles.sidebarIcon}>⚙️</ThemedText>
+              <FontAwesome name="cog" size={18} color={colors.primary} />
               <ThemedText style={styles.sidebarLabel}>Mipangilio</ThemedText>
             </TouchableOpacity>
           </Link>
@@ -225,7 +227,11 @@ export default function HomeScreen() {
               style={styles.sidebarItem}
               onPress={toggleSidebar}
             >
-              <ThemedText style={styles.sidebarIcon}>❓</ThemedText>
+              <FontAwesome
+                name="question-circle"
+                size={18}
+                color={colors.primary}
+              />
               <ThemedText style={styles.sidebarLabel}>Msaada</ThemedText>
             </TouchableOpacity>
           </Link>
@@ -235,7 +241,7 @@ export default function HomeScreen() {
               style={styles.sidebarItem}
               onPress={toggleSidebar}
             >
-              <ThemedText style={styles.sidebarIcon}>🚗</ThemedText>
+              <FontAwesome name="car" size={18} color={colors.primary} />
               <ThemedText style={styles.sidebarLabel}>Magari yangu</ThemedText>
             </TouchableOpacity>
           </Link>
@@ -253,8 +259,8 @@ export default function HomeScreen() {
               }
             }}
           >
-            <ThemedText style={styles.sidebarIcon}>🚪</ThemedText>
-            <ThemedText style={[styles.sidebarLabel, { color: colors.danger }]}>
+            <FontAwesome name="sign-out" size={18} color="#FF5252" />
+            <ThemedText style={[styles.sidebarLabel, { color: "#FF5252" }]}>
               Toka nje
             </ThemedText>
           </TouchableOpacity>
@@ -269,18 +275,19 @@ export default function HomeScreen() {
             style={styles.profileButton}
             onPress={toggleSidebar}
           >
-            <ThemedText style={styles.profileIcon}>👤</ThemedText>
+            <FontAwesome name="bars" size={24} color={colors.primary} />
           </TouchableOpacity>
 
           <TouchableOpacity
             style={[
               styles.onlineButton,
-              { backgroundColor: isOnline ? colors.primary : colors.danger },
+              { backgroundColor: isOnline ? colors.primary : "#FF5252" },
             ]}
             onPress={handleToggleOnline}
           >
+            <FontAwesome name="circle" size={20} color="#fff" />
             <ThemedText style={styles.onlineButtonText}>
-              {isOnline ? "🟢" : "🔴"}
+              {isOnline ? "Online" : "Offline"}
             </ThemedText>
           </TouchableOpacity>
         </View>
@@ -290,7 +297,7 @@ export default function HomeScreen() {
           style={[
             styles.mapContainer,
             {
-              backgroundColor: isDark ? colors.cardBackground : "#E0E0E0",
+              backgroundColor: isDark ? colors.cardBackground : "#E8EAED",
               height: mapHeightAnim.interpolate({
                 inputRange: [0, height * 0.18],
                 outputRange: [height * 0.32, height * 0.5],
@@ -303,20 +310,23 @@ export default function HomeScreen() {
           <View style={styles.dragHandle}>
             <View style={styles.dragIndicator} />
           </View>
-          <ThemedText style={styles.mapText}>🗺️ Ramani</ThemedText>
+          <View style={styles.mapHeaderContent}>
+            <FontAwesome name="map-marker" size={20} color="#2196F3" />
+            <ThemedText style={styles.mapText}>Real-time Location</ThemedText>
+          </View>
           <View style={styles.mapPins}>
             <View style={[styles.pin, { top: "20%", right: "15%" }]}>
-              <ThemedText>📍</ThemedText>
+              <FontAwesome name="map-marker" size={20} color="#FF5252" />
             </View>
             <View style={[styles.pin, { top: "45%", left: "20%" }]}>
-              <ThemedText>📍</ThemedText>
+              <FontAwesome name="map-marker" size={20} color="#FF5252" />
             </View>
             <View style={[styles.pin, { bottom: "15%", right: "25%" }]}>
-              <ThemedText>📍</ThemedText>
+              <FontAwesome name="map-marker" size={20} color="#FF5252" />
             </View>
           </View>
           <View style={styles.driverLocation}>
-            <ThemedText style={styles.driverIcon}>🚗</ThemedText>
+            <FontAwesome name="car" size={28} color={colors.primary} />
           </View>
         </Animated.View>
 
@@ -326,13 +336,14 @@ export default function HomeScreen() {
           showsVerticalScrollIndicator={false}
         >
           <ThemedText type="subtitle" style={styles.gigsTitle}>
-            Gigs Available ({gigs.length})
+            Available Gigs ({gigs.length})
           </ThemedText>
 
           {!isOnline ? (
-            <View style={{ padding: 20, alignItems: "center" }}>
-              <ThemedText style={{ fontSize: 16, color: colors.danger }}>
-                🔴 Go online to receive gigs
+            <View style={styles.offlineContainer}>
+              <FontAwesome name="circle" size={32} color="#FF5252" />
+              <ThemedText style={styles.offlineText}>
+                Go online to receive gigs
               </ThemedText>
             </View>
           ) : (
@@ -346,7 +357,7 @@ export default function HomeScreen() {
               >
                 <View style={styles.gigHeader}>
                   <View style={styles.gigLocation}>
-                    <View style={styles.dotStart} />
+                    <FontAwesome name="map-marker" size={16} color="#4CAF50" />
                     <ThemedText style={styles.locationText} numberOfLines={1}>
                       {gig.from}
                     </ThemedText>
@@ -358,7 +369,7 @@ export default function HomeScreen() {
 
                 <View style={styles.gigFooter}>
                   <View style={styles.gigLocation}>
-                    <View style={styles.dotEnd} />
+                    <FontAwesome name="map-marker" size={16} color="#FF9800" />
                     <ThemedText style={styles.locationText} numberOfLines={1}>
                       {gig.to}
                     </ThemedText>
@@ -366,15 +377,26 @@ export default function HomeScreen() {
                 </View>
 
                 <View style={styles.gigDetails}>
-                  <ThemedText style={styles.detailText}>
-                    📏 {gig.distance}
-                  </ThemedText>
-                  <ThemedText style={styles.detailText}>
-                    ⏱️ {gig.eta}
-                  </ThemedText>
-                  <ThemedText style={styles.detailText}>
-                    👤 {gig.passenger}
-                  </ThemedText>
+                  <View style={styles.detailItem}>
+                    <FontAwesome name="road" size={12} color={colors.primary} />
+                    <ThemedText style={styles.detailText}>
+                      {gig.distance}
+                    </ThemedText>
+                  </View>
+                  <View style={styles.detailItem}>
+                    <FontAwesome
+                      name="clock-o"
+                      size={12}
+                      color={colors.primary}
+                    />
+                    <ThemedText style={styles.detailText}>{gig.eta}</ThemedText>
+                  </View>
+                  <View style={styles.detailItem}>
+                    <FontAwesome name="user" size={12} color={colors.primary} />
+                    <ThemedText style={styles.detailText}>
+                      {gig.passenger}
+                    </ThemedText>
+                  </View>
                 </View>
 
                 <TouchableOpacity
@@ -392,8 +414,14 @@ export default function HomeScreen() {
                   }
                   disabled={acceptedGigs.includes(gig.id)}
                 >
+                  <FontAwesome
+                    name={acceptedGigs.includes(gig.id) ? "check" : "check"}
+                    size={14}
+                    color="#fff"
+                    style={{ marginRight: 6 }}
+                  />
                   <ThemedText style={styles.acceptText}>
-                    {acceptedGigs.includes(gig.id) ? "✓ Imekubali" : "Kubali"}
+                    {acceptedGigs.includes(gig.id) ? "Accepted" : "Accept Gig"}
                   </ThemedText>
                 </TouchableOpacity>
               </TouchableOpacity>
@@ -440,26 +468,38 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginBottom: 16,
   },
-  closeIcon: {
-    fontSize: 24,
-    fontWeight: "700",
+  avatarCircle: {
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    backgroundColor: "#4CAF50",
+    justifyContent: "center",
+    alignItems: "center",
+    marginRight: 12,
   },
   sidebarHeader: {
     flexDirection: "row",
     alignItems: "center",
     marginBottom: 16,
   },
-  sidebarAvatar: {
-    fontSize: 48,
-    marginRight: 12,
-  },
   sidebarUserInfo: {
     flex: 1,
   },
-  userStatus: {
-    fontSize: 12,
-    opacity: 0.6,
+  ratingBadge: {
+    flexDirection: "row",
+    alignItems: "center",
     marginTop: 4,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    backgroundColor: "#FFF3E0",
+    borderRadius: 6,
+    alignSelf: "flex-start",
+  },
+  ratingText: {
+    fontSize: 12,
+    marginLeft: 4,
+    color: "#F57F17",
+    fontWeight: "600",
   },
   sidebarDivider: {
     height: 1,
@@ -471,14 +511,10 @@ const styles = StyleSheet.create({
     alignItems: "center",
     paddingVertical: 14,
   },
-  sidebarIcon: {
-    fontSize: 20,
-    marginRight: 12,
-    width: 24,
-  },
   sidebarLabel: {
     fontSize: 14,
     fontWeight: "500",
+    marginLeft: 16,
   },
   logoutItem: {
     marginBottom: 20,
@@ -494,6 +530,38 @@ const styles = StyleSheet.create({
     paddingBottom: 8,
     zIndex: 5,
   },
+  profileButton: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: "rgba(0,0,0,0.08)",
+    justifyContent: "center",
+    alignItems: "center",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 3,
+    elevation: 2,
+  },
+  onlineButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: 14,
+    height: 44,
+    borderRadius: 22,
+    justifyContent: "center",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.15,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  onlineButtonText: {
+    fontSize: 12,
+    fontWeight: "700",
+    color: "#fff",
+    marginLeft: 6,
+  },
   dragHandle: {
     width: "100%",
     paddingVertical: 8,
@@ -506,27 +574,6 @@ const styles = StyleSheet.create({
     borderRadius: 2,
     backgroundColor: "rgba(0,0,0,0.3)",
   },
-  profileButton: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    backgroundColor: "rgba(0,0,0,0.1)",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  profileIcon: {
-    fontSize: 24,
-  },
-  onlineButton: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  onlineButtonText: {
-    fontSize: 24,
-  },
   mapContainer: {
     height: height * 0.32,
     justifyContent: "center",
@@ -534,13 +581,29 @@ const styles = StyleSheet.create({
     position: "relative",
     marginHorizontal: 12,
     marginVertical: 8,
-    borderRadius: 12,
+    borderRadius: 16,
     overflow: "hidden",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.12,
+    shadowRadius: 6,
+    elevation: 4,
+  },
+  mapHeaderContent: {
+    flexDirection: "row",
+    alignItems: "center",
+    zIndex: 5,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    position: "absolute",
+    top: 0,
+    left: 0,
   },
   mapText: {
-    fontSize: 16,
-    fontWeight: "600",
-    zIndex: 1,
+    fontSize: 14,
+    fontWeight: "700",
+    marginLeft: 8,
+    color: "#2196F3",
   },
   mapPins: {
     ...StyleSheet.absoluteFillObject,
@@ -553,9 +616,6 @@ const styles = StyleSheet.create({
     position: "absolute",
     zIndex: 10,
   },
-  driverIcon: {
-    fontSize: 32,
-  },
   gigsList: {
     flex: 1,
     paddingHorizontal: 12,
@@ -565,14 +625,20 @@ const styles = StyleSheet.create({
     marginTop: 12,
     marginBottom: 12,
     fontSize: 14,
+    fontWeight: "600",
     opacity: 0.7,
   },
   gigCard: {
-    borderRadius: 12,
-    padding: 12,
+    borderRadius: 14,
+    padding: 14,
     marginBottom: 12,
-    borderLeftWidth: 4,
-    borderLeftColor: "#4CAF50",
+    borderLeftWidth: 5,
+    borderLeftColor: "#2196F3",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 4,
+    elevation: 2,
   },
   gigHeader: {
     flexDirection: "row",
@@ -584,36 +650,23 @@ const styles = StyleSheet.create({
     alignItems: "flex-start",
     flex: 1,
   },
-  dotStart: {
-    width: 6,
-    height: 6,
-    borderRadius: 3,
-    backgroundColor: "#4CAF50",
-    marginRight: 8,
-    marginTop: 4,
-  },
-  dotEnd: {
-    width: 6,
-    height: 6,
-    borderRadius: 3,
-    backgroundColor: "#FF9800",
-    marginRight: 8,
-    marginTop: 4,
-  },
   locationText: {
     fontSize: 11,
     flex: 1,
+    marginLeft: 8,
+    fontWeight: "500",
   },
   gigAmount: {
     fontSize: 13,
     fontWeight: "700",
     marginLeft: 12,
+    color: "#4CAF50",
   },
   verticalLine: {
     width: 2,
     height: 16,
     backgroundColor: "#ddd",
-    marginLeft: 3,
+    marginLeft: 7,
     marginVertical: 4,
   },
   gigFooter: {
@@ -622,27 +675,53 @@ const styles = StyleSheet.create({
   },
   gigDetails: {
     flexDirection: "row",
-    justifyContent: "space-between",
-    paddingVertical: 8,
+    justifyContent: "space-around",
+    paddingVertical: 10,
     borderTopWidth: 1,
     borderBottomWidth: 1,
-    borderColor: "rgba(0,0,0,0.1)",
+    borderColor: "rgba(0,0,0,0.08)",
     marginVertical: 8,
   },
+  detailItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+  },
   detailText: {
-    fontSize: 10,
-    opacity: 0.6,
+    fontSize: 11,
+    fontWeight: "500",
+    marginLeft: 6,
+    opacity: 0.7,
   },
   acceptButton: {
+    flexDirection: "row",
     backgroundColor: "#4CAF50",
-    borderRadius: 8,
-    paddingVertical: 10,
+    borderRadius: 10,
+    paddingVertical: 12,
     alignItems: "center",
-    marginTop: 8,
+    justifyContent: "center",
+    marginTop: 10,
+    shadowColor: "#4CAF50",
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.25,
+    shadowRadius: 5,
+    elevation: 3,
   },
   acceptText: {
     color: "#fff",
     fontWeight: "700",
-    fontSize: 12,
+    fontSize: 13,
+    letterSpacing: 0.3,
+  },
+  offlineContainer: {
+    paddingVertical: 40,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  offlineText: {
+    fontSize: 14,
+    marginTop: 12,
+    opacity: 0.6,
+    fontWeight: "500",
   },
 });

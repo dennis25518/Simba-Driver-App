@@ -9,6 +9,7 @@ import { useEffect } from "react";
 import "react-native-reanimated";
 
 import { AuthProvider, useAuth } from "@/context/auth";
+import { OrdersProvider } from "@/context/orders";
 import { useColorScheme } from "@/hooks/use-color-scheme";
 
 function RootLayoutContent() {
@@ -52,7 +53,9 @@ function RootLayoutContent() {
 export default function RootLayout() {
   return (
     <AuthProvider>
-      <RootLayoutContent />
+      <OrdersProvider>
+        <RootLayoutContent />
+      </OrdersProvider>
     </AuthProvider>
   );
 }
