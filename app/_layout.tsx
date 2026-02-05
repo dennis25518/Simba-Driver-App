@@ -1,7 +1,7 @@
 import {
   DarkTheme,
   DefaultTheme,
-  ThemeProvider,
+  ThemeProvider as NavigationThemeProvider,
 } from "@react-navigation/native";
 import { Stack, useRouter } from "expo-router";
 import { StatusBar } from "expo-status-bar";
@@ -10,6 +10,7 @@ import "react-native-reanimated";
 
 import { AuthProvider, useAuth } from "@/context/auth";
 import { OrdersProvider } from "@/context/orders";
+import { ThemeProvider } from "@/context/theme";
 import { useColorScheme } from "@/hooks/use-color-scheme";
 
 function RootLayoutContent() {
@@ -32,7 +33,9 @@ function RootLayoutContent() {
   }
 
   return (
-    <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
+    <NavigationThemeProvider
+      value={colorScheme === "dark" ? DarkTheme : DefaultTheme}
+    >
       <Stack
         screenOptions={{
           headerShown: false,
@@ -46,16 +49,18 @@ function RootLayoutContent() {
         <Stack.Screen name="sidebar" />
       </Stack>
       <StatusBar style="auto" />
-    </ThemeProvider>
+    </NavigationThemeProvider>
   );
 }
 
 export default function RootLayout() {
   return (
-    <AuthProvider>
-      <OrdersProvider>
-        <RootLayoutContent />
-      </OrdersProvider>
-    </AuthProvider>
+    <ThemeProvider>
+      <AuthProvider>
+        <OrdersProvider>
+          <RootLayoutContent />
+        </OrdersProvider>
+      </AuthProvider>
+    </ThemeProvider>
   );
 }

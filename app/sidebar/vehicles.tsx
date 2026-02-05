@@ -1,14 +1,18 @@
 import { ThemedText } from "@/components/themed-text";
 import { ThemedView } from "@/components/themed-view";
+import { Colors } from "@/constants/theme";
+import { useTheme } from "@/context/theme";
 import { useColorScheme } from "@/hooks/use-color-scheme";
+import { FontAwesome } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import {
-    Alert,
-    ScrollView,
-    StyleSheet,
-    TouchableOpacity,
-    View,
+  Alert,
+  Animated,
+  ScrollView,
+  StyleSheet,
+  TouchableOpacity,
+  View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
@@ -28,8 +32,13 @@ interface Vehicle {
 export default function VehiclesScreen() {
   const colorScheme = useColorScheme();
   const isDark = colorScheme === "dark";
+  const colors = Colors[colorScheme ?? "light"];
+  const { themeMode, toggleTheme } = useTheme();
   const router = useRouter();
   const insets = useSafeAreaInsets();
+  const toggleAnim = useRef(
+    new Animated.Value(themeMode === "dark" ? 1 : 0),
+  ).current;
   const [vehicles, setVehicles] = useState<Vehicle[]>([
     {
       id: 1,
@@ -72,6 +81,15 @@ export default function VehiclesScreen() {
     );
   };
 
+  const handleThemeToggle = () => {
+    toggleTheme();
+    Animated.timing(toggleAnim, {
+      toValue: themeMode === "dark" ? 0 : 1,
+      duration: 400,
+      useNativeDriver: false,
+    }).start();
+  };
+
   return (
     <ThemedView style={styles.container}>
       {/* Header */}
@@ -93,7 +111,70 @@ export default function VehiclesScreen() {
         <ThemedText type="title" style={styles.headerTitle}>
           Magari Yangu
         </ThemedText>
-        <View style={styles.headerSpacer} />
+        <TouchableOpacity
+          style={styles.themeToggleButton}
+          onPress={handleThemeToggle}
+        >
+          <FontAwesome
+            name={themeMode === "dark" ? "moon-o" : "sun-o"}
+            size={24}
+            color={colors.primary}
+          />
+        </TouchableOpacity>
+      </View>
+
+      {/* Theme Toggle Section */}
+      <View
+        style={[
+          styles.themeToggleSection,
+          {
+            backgroundColor: isDark ? "#1a1a2e" : "#f8f8f8",
+          },
+        ]}
+      >
+        <View style={styles.themeToggleContent}>
+          <FontAwesome
+            name="sliders"
+            size={20}
+            color={colors.primary}
+            style={styles.themeIcon}
+          />
+          <View style={styles.themeToggleText}>
+            <ThemedText style={styles.themeToggleTitle}>App Theme</ThemedText>
+            <ThemedText style={styles.themeToggleSubtitle}>
+              {themeMode === "light"
+                ? "Light Mode (White)"
+                : "Dark Mode (Blue)"}
+            </ThemedText>
+          </View>
+          <Animated.View
+            style={[
+              styles.toggleSwitch,
+              {
+                backgroundColor: toggleAnim.interpolate({
+                  inputRange: [0, 1],
+                  outputRange: [colors.primary, "#1a3a5c"],
+                }),
+              },
+            ]}
+          >
+            <Animated.View
+              style={[
+                styles.toggleDot,
+                {
+                  transform: [
+                    {
+                      translateX: toggleAnim.interpolate({
+                        inputRange: [0, 1],
+                        outputRange: [2, 22],
+                      }),
+                    },
+                  ],
+                },
+              ]}
+            />
+          </Animated.View>
+        </View>
       </View>
 
       <ScrollView
@@ -501,5 +582,57 @@ const styles = StyleSheet.create({
   docDate: {
     fontSize: 12,
     opacity: 0.6,
+  },
+  themeToggleButton: {
+    width: 40,
+    height: 40,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  themeToggleSection: {
+    marginHorizontal: 16,
+    marginTop: 8,
+    marginBottom: 16,
+    borderRadius: 12,
+    padding: 14,
+    borderWidth: 0.5,
+    borderColor: "rgba(0,0,0,0.1)",
+  },
+  themeToggleContent: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  themeIcon: {
+    marginRight: 12,
+  },
+  themeToggleText: {
+    flex: 1,
+  },
+  themeToggleTitle: {
+    fontWeight: "600",
+    fontSize: 14,
+    marginBottom: 2,
+  },
+  themeToggleSubtitle: {
+    fontSize: 12,
+    opacity: 0.7,
+  },
+  toggleSwitch: {
+    width: 50,
+    height: 28,
+    borderRadius: 14,
+    justifyContent: "center",
+    paddingHorizontal: 2,
+  },
+  toggleDot: {
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    backgroundColor: "#fff",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 3,
+    elevation: 4,
   },
 });
