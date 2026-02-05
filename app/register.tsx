@@ -98,7 +98,7 @@ export default function RegisterScreen() {
                 />
                 <TextInput
                   style={[styles.inputText, { color: "#1a1a1a" }]}
-                  placeholder="France Masama"
+                  placeholder="Simba Express"
                   placeholderTextColor="#999999"
                   onChangeText={setName}
                   value={name}
@@ -124,7 +124,7 @@ export default function RegisterScreen() {
                 />
                 <TextInput
                   style={[styles.inputText, { color: "#1a1a1a" }]}
-                  placeholder="france@example.com"
+                  placeholder="driver@simbaexpress.com"
                   placeholderTextColor="#999999"
                   keyboardType="email-address"
                   onChangeText={setEmail}

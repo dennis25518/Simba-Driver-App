@@ -83,7 +83,7 @@ export default function LoginScreen() {
                 />
                 <TextInput
                   style={[styles.inputText, { color: "#1a1a1a" }]}
-                  placeholder="france@example.com"
+                  placeholder="driver@simbaexpress.com"
                   placeholderTextColor="#999999"
                   onChangeText={setEmail}
                   value={email}
